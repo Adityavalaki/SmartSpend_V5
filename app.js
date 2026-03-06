@@ -283,13 +283,28 @@ function updateDashboard() {
   var bal = inc - exp;
   var bl = Math.max(0, cfg.budgetLimit - exp);
 
+  var budSwitch = document.getElementById('bud-switch');
+  var budActive = budSwitch && budSwitch.checked;
+  var pBud = document.getElementById('p-bud');
+  var budFormula = document.getElementById('bud-formula');
+  if (pBud) {
+    if (budActive && cfg.budgetLimit > 0) {
+      pBud.textContent = cur(bl);
+      pBud.style.color = bl === 0 ? 'var(--red)' : 'var(--cyan)';
+      if (budFormula) budFormula.textContent = '(' + fmt(cfg.budgetLimit) + ' − ' + fmt(exp) + ')';
+    } else {
+      pBud.textContent = cfg.budgetLimit > 0 ? '—' : '—';
+      pBud.style.color = 'var(--tx3)';
+      if (budFormula) budFormula.textContent = cfg.budgetLimit > 0 ? '(limit − expense)' : '';
+    }
+  }
+
   function set(id, val) { var e = document.getElementById(id); if(e) e.textContent = val; }
 
   set('month-label', NOW.toLocaleString('en-IN', {month:'long', year:'numeric'}));
   set('bal-val', Math.abs(bal).toFixed(2));
   set('p-inc', cur(inc));
   set('p-exp', cur(exp));
-  set('p-bud', cur(bl));
   set('s-today', cur(todayExp));
   set('s-inc', cur(inc));
   set('s-cash', cur(cashExp));
@@ -969,3 +984,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   init();
 });
+
+function toggleBudgetLeft() {
+  updateDashboard();
+}

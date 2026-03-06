@@ -88,6 +88,13 @@ input,select,button,textarea{font-family:var(--f)}
 .pill-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .pill-l{font-size:10px;color:var(--tx3);font-weight:500}
 .pill-v{font-family:var(--fm);font-size:12px;font-weight:700;margin-left:auto}
+.bud-formula{font-size:9px;color:var(--tx3);font-weight:400;display:block;margin-top:1px}
+.bud-sw{position:relative;display:inline-flex;width:28px;height:16px;flex-shrink:0;margin-left:4px}
+.bud-sw input{opacity:0;width:0;height:0;position:absolute}
+.bud-sl{position:absolute;inset:0;background:var(--tx3);border-radius:8px;transition:background .2s;cursor:pointer}
+.bud-sl::before{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s}
+.bud-sw input:checked+.bud-sl{background:var(--cyan)}
+.bud-sw input:checked+.bud-sl::before{transform:translateX(12px)}
 
 /* ═══ DESKTOP NAV ═══ */
 .desk-nav{background:var(--nbg);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:73px;z-index:250}
@@ -350,7 +357,7 @@ select.fi option{background:var(--bge);color:var(--tx)}
     <div class="bal-pills">
       <div class="pill"><div class="pill-d" style="background:var(--green)"></div><span class="pill-l">Income</span><span class="pill-v" id="p-inc">₹0</span></div>
       <div class="pill"><div class="pill-d" style="background:var(--red)"></div><span class="pill-l">Expense</span><span class="pill-v" id="p-exp">₹0</span></div>
-      <div class="pill"><div class="pill-d" style="background:var(--cyan)"></div><span class="pill-l">Budget Left</span><span class="pill-v" id="p-bud">₹0</span></div>
+      <div class="pill"><div class="pill-d" style="background:var(--cyan)"></div><span class="pill-l">Budget Left<span class="bud-formula" id="bud-formula"></span></span><span class="pill-v" id="p-bud" style="color:var(--tx3)">—</span><label class="bud-sw" title="Enable budget tracking"><input type="checkbox" id="bud-switch" onchange="toggleBudgetLeft()"><span class="bud-sl"></span></label></div>
     </div>
   </div>
 </div>
