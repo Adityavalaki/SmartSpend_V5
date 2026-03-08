@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07090f">
+<title>SmartSpend — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-api.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:'Outfit',sans-serif;background:#07090f;color:#e2ecf8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none}
+.orb1{width:500px;height:500px;top:-150px;left:-150px;background:radial-gradient(circle,rgba(0,212,184,.1),transparent 70%)}
+.orb2{width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(139,92,246,.1),transparent 70%)}
+.box{position:relative;z-index:1;background:rgba(13,17,23,.95);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:40px;width:100%;max-width:420px;backdrop-filter:blur(20px);box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center}
+.logo-ico{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#00d4b8,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(0,212,184,.3)}
+.logo-t{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.logo-v{font-family:'JetBrains Mono',monospace;font-size:8px;color:#00d4b8;letter-spacing:2px;text-transform:uppercase}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.04);border-radius:12px;padding:4px;margin-bottom:28px}
+.tab-btn{padding:10px;border:none;background:transparent;border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:#6b82a0;cursor:pointer;transition:all .25s}
+.tab-btn.on{background:rgba(0,212,184,.12);color:#00d4b8}
+.ttl{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
+.sub{font-size:13px;color:#6b82a0;margin-bottom:24px}
+label{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#4d6080;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+input{width:100%;padding:13px 16px;background:#0d1117;border:1px solid rgba(255,255,255,.07);border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;color:#e2ecf8;outline:none;transition:all .25s;margin-bottom:14px}
+input:focus{border-color:#00d4b8;box-shadow:0 0 0 3px rgba(0,212,184,.1)}
+input::placeholder{color:#2d3f56}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#00d4b8,#00b39a);color:#07090f;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:all .3s;margin-top:4px}
+.btn:hover{box-shadow:0 8px 24px rgba(0,212,184,.3);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.err{background:rgba(255,79,109,.08);border:1px solid rgba(255,79,109,.2);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#ff4f6d;display:none}
+.ok{background:rgba(29,233,130,.07);border:1px solid rgba(29,233,130,.2);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#1de982;display:none}
+.foot{text-align:center;font-size:12px;color:#4d6080;margin-top:18px}
+.foot a{color:#00d4b8;text-decoration:none;font-weight:600;cursor:pointer}
+.strength{height:3px;border-radius:2px;margin-top:-10px;margin-bottom:14px;transition:all .3s;background:#1a2535}
+.strength.w{background:#ff4f6d;width:33%}
+.strength.m{background:#ffb800;width:66%}
+.strength.s{background:#1de982;width:100%}
+.note{font-family:'JetBrains Mono',monospace;font-size:10px;color:#2d3f56;text-align:center;margin-top:16px}
+.pnl{display:none}
+.pnl.on{display:block}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="box">
+  <div class="logo">
+    <div class="logo-ico">💸</div>
+    <div>
+      <div class="logo-t">SmartSpend</div>
+      <div class="logo-v">Finance OS · v6.0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-login" onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <div id="msg-err" class="err"></div>
+  <div id="msg-ok"  class="ok"></div>
+
+  <!-- LOGIN PANEL -->
+  <div class="pnl on" id="pnl-login">
+    <div class="ttl">Welcome back</div>
+    <div class="sub">Sign in to your SmartSpend account</div>
+    <label>Email Address</label>
+    <input type="email" id="l-email" placeholder="you@example.com" autocomplete="email">
+    <label>Password</label>
+    <input type="password" id="l-pass" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn" id="l-btn" onclick="doLogin()">Sign In →</button>
+    <div class="foot">Don't have an account? <a onclick="switchTab('register')">Register free</a></div>
+  </div>
+
+  <!-- REGISTER PANEL -->
+  <div class="pnl" id="pnl-register">
+    <div class="ttl">Create account</div>
+    <div class="sub">Your data stays private — no one else can see it</div>
+    <label>Your Name</label>
+    <input type="text" id="r-name" placeholder="Aditya" autocomplete="name">
+    <label>Email Address</label>
+    <input type="email" id="r-email" placeholder="you@example.com" autocomplete="email">
+    <label>Password</label>
+    <input type="password" id="r-pass" placeholder="Min 6 characters" autocomplete="new-password" oninput="checkStr(this.value)" onkeydown="if(event.key==='Enter')doRegister()">
+    <div class="strength" id="str"></div>
+    <label>Confirm Password</label>
+    <input type="password" id="r-pass2" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+    <button class="btn" id="r-btn" onclick="doRegister()">Create Account →</button>
+    <div class="foot">Already have an account? <a onclick="switchTab('login')">Sign in</a></div>
+    <div class="note">🔒 Your transactions are 100% private</div>
+  </div>
+</div>
+
+<script>
+// Redirect if already logged in
+_sb.auth.getSession().then(function(res) {
+  if (res.data.session) window.location.href = 'index.html';
+});
+
+function switchTab(mode) {
+  document.getElementById('pnl-login').classList.toggle('on', mode === 'login');
+  document.getElementById('pnl-register').classList.toggle('on', mode === 'register');
+  document.getElementById('tab-login').classList.toggle('on', mode === 'login');
+  document.getElementById('tab-register').classList.toggle('on', mode === 'register');
+  hideMsg();
+}
+
+function showErr(msg) {
+  var e = document.getElementById('msg-err');
+  e.textContent = '⚠️ ' + msg;
+  e.style.display = 'block';
+  document.getElementById('msg-ok').style.display = 'none';
+}
+
+function showOk(msg) {
+  var e = document.getElementById('msg-ok');
+  e.textContent = '✅ ' + msg;
+  e.style.display = 'block';
+  document.getElementById('msg-err').style.display = 'none';
+}
+
+function hideMsg() {
+  document.getElementById('msg-err').style.display = 'none';
+  document.getElementById('msg-ok').style.display = 'none';
+}
+
+function setBusy(btnId, busy) {
+  var btn = document.getElementById(btnId);
+  btn.disabled = busy;
+  if (busy) btn.textContent = 'Please wait...';
+}
+
+async function doLogin() {
+  var email = document.getElementById('l-email').value.trim();
+  var pass  = document.getElementById('l-pass').value;
+  if (!email || !pass) { showErr('Please enter email and password.'); return; }
+  setBusy('l-btn', true);
+  try {
+    await sbSignIn(email, pass);
+    showOk('Signed in! Redirecting...');
+    setTimeout(function(){ window.location.href = 'index.html'; }, 500);
+  } catch(e) {
+    showErr(e.message || 'Login failed.');
+    document.getElementById('l-btn').disabled = false;
+    document.getElementById('l-btn').textContent = 'Sign In →';
+  }
+}
+
+async function doRegister() {
+  var name  = document.getElementById('r-name').value.trim();
+  var email = document.getElementById('r-email').value.trim();
+  var pass  = document.getElementById('r-pass').value;
+  var pass2 = document.getElementById('r-pass2').value;
+  if (!name || !email || !pass) { showErr('All fields are required.'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+  if (pass !== pass2)  { showErr('Passwords do not match.'); return; }
+  setBusy('r-btn', true);
+  try {
+    await sbSignUp(email, pass, name);
+    showOk('Account created! Check your email to confirm, then sign in.');
+    switchTab('login');
+  } catch(e) {
+    showErr(e.message || 'Registration failed.');
+    document.getElementById('r-btn').disabled = false;
+    document.getElementById('r-btn').textContent = 'Create Account →';
+  }
+}
+
+function checkStr(v) {
+  var s = document.getElementById('str');
+  if (!s) return;
+  if (v.length < 4) { s.className = 'strength'; return; }
+  if (v.length < 8 || !/[0-9]/.test(v)) { s.className = 'strength w'; return; }
+  if (v.length < 10) { s.className = 'strength m'; return; }
+  s.className = 'strength s';
+}
+</script>
+</body>
+</html>

@@ -929,8 +929,18 @@ function clearAll() {
 // INIT
 // ═══════════════════════════════
 function init() {
+  sbCheckSession();
   initTheme();
 
+  _sb.auth.getUser().then(function(r) {
+  if (r.data.user) {
+    var name = r.data.user.user_metadata.name || r.data.user.email;
+    var el = document.getElementById('user-name');
+    var av = document.getElementById('user-av');
+    if (el) el.textContent = name;
+    if (av) av.textContent = name.charAt(0).toUpperCase();
+  }
+  });
   // Set dates
   var fd = document.getElementById('f-date');
   if (fd) fd.value = TODAY;
@@ -957,6 +967,7 @@ function init() {
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
+   sbCheckSession(); // redirects to login.html if not logged in
   // Force hide all tabs
   var names = ['dashboard','wallets','transactions','add','budget','goals','split','analytics','settings'];
   names.forEach(function(name) {
