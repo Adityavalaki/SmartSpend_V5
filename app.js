@@ -111,44 +111,23 @@ function initTheme() {
 // ═══════════════════════════════
 // API HELPERS
 // ═══════════════════════════════
-function GET(url, cb) {
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(d) { cb(null, d); })
-    .catch(function(e) { cb(e, null); });
-}
-function POST(url, data, cb) {
-  cb = cb || function(){};
-  fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)})
-    .then(function(r) { return r.json(); })
-    .then(function(d) { cb(null, d); })
-    .catch(function(e) { cb(e, null); });
-}
-function DEL(url, cb) {
-  cb = cb || function(){};
-  fetch(url, {method:'DELETE'})
-    .then(function(r) { return r.json(); })
-    .then(function(d) { cb(null, d); })
-    .catch(function(e) { cb(e, null); });
-}
-
 // ═══════════════════════════════
 // STATUS CHECK
 // ═══════════════════════════════
 function checkStatus() {
-  GET(API + '/transactions.php?limit=1', function(err, r) {
-    var ok = !err && r !== null;
-    ['api-dot','php-dot','db-dot'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.className = ok ? 'dot' : 'dot off';
+  _sb.from('ss_transactions').select('id').limit(1)
+    .then(function(res) {
+      var ok = !res.error;
+      ['api-dot','php-dot','db-dot'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.className = ok ? 'dot' : 'dot off';
+      });
+      ['api-lbl','php-st','db-st'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = ok ? 'Live' : 'Offline';
+      });
     });
-    ['api-lbl','php-st','db-st'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = ok ? 'Live' : 'Offline';
-    });
-  });
 }
-
 // ═══════════════════════════════
 // LOAD ALL DATA
 // ═══════════════════════════════
