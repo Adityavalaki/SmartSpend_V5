@@ -301,8 +301,9 @@ async function _sbPOST(url, data) {
     }
 
     if (q.action === 'transfer') {
-      var from = data.from; var to = data.to; var amt = parseFloat(data.amount);
-
+      var from = (data.from || '').toLowerCase().replace(' wallet', '').trim();
+      var to   = (data.to   || '').toLowerCase().replace(' wallet', '').trim();
+      var amt  = parseFloat(data.amount);
       // Get from-wallet balance
       var fromRes = await _sb.from('ss_wallets').select('balance').eq('user_id', uid).eq('name', from).single();
       if (fromRes.error) throw fromRes.error;
