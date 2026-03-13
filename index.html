@@ -381,6 +381,7 @@ select.fi option{background:var(--bge);color:var(--tx)}
   <button class="dn" data-tab="split">⇌ Split</button>
   <button class="dn" data-tab="analytics">≋ Analytics</button>
   <button class="dn" data-tab="settings">◈ Settings</button>
+  <button class="dn" data-tab="feedback">★ Feedback</button>
 </div>
 </nav>
 
@@ -671,6 +672,61 @@ select.fi option{background:var(--bge);color:var(--tx)}
   </div>
 </div>
 
+<!-- ── FEEDBACK ── -->
+<div id="tab-feedback" class="tab">
+  <div class="card mb" style="max-width:600px;margin:0 auto">
+    <div class="ch">
+      <span class="ct">★ Share Your Feedback</span>
+      <span class="cbadge">LINKEDIN LAUNCH</span>
+    </div>
+    <p style="font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6">
+      SmartSpend v6 is live! Built with Supabase + vanilla JS. 
+      Your feedback helps improve it. 🚀
+    </p>
+
+    <!-- Star Rating -->
+    <div class="fg">
+      <label class="fl">Your Rating</label>
+      <div id="star-row" style="display:flex;gap:8px;font-size:28px;cursor:pointer;margin-bottom:4px">
+        <span class="star" data-v="1">☆</span>
+        <span class="star" data-v="2">☆</span>
+        <span class="star" data-v="3">☆</span>
+        <span class="star" data-v="4">☆</span>
+        <span class="star" data-v="5">☆</span>
+      </div>
+      <input type="hidden" id="fb-rating" value="0">
+    </div>
+
+    <div class="fg">
+      <label class="fl">Your Name (optional)</label>
+      <input type="text" class="fi" id="fb-name" placeholder="Aditya, Anonymous...">
+    </div>
+
+    <div class="fg">
+      <label class="fl">Message</label>
+      <textarea class="fi" id="fb-msg" rows="4" 
+        placeholder="What do you think about SmartSpend? Any suggestions?"
+        style="resize:vertical;min-height:100px"></textarea>
+    </div>
+
+    <button class="btn btn-p btn-full" onclick="submitFeedback()">
+      🚀 Submit Feedback
+    </button>
+
+    <div id="fb-thanks" style="display:none;margin-top:16px" class="ic success">
+      <div class="ic-ico">🎉</div>
+      <div><div class="ic-t">Thank you!</div>
+      <div class="ic-b">Your feedback has been recorded. Much appreciated!</div></div>
+    </div>
+  </div>
+
+  <!-- Previous Feedback -->
+  <div class="card" style="max-width:600px;margin:16px auto 0">
+    <div class="ch"><span class="ct">Recent Feedback</span></div>
+    <div id="fb-list"><div class="spin"></div></div>
+  </div>
+</div>
+
 </main><!-- /main -->
 
 <!-- ═══ BOTTOM NAV ═══ -->
@@ -685,6 +741,7 @@ select.fi option{background:var(--bge);color:var(--tx)}
   <button class="bn" data-tab="split"><div class="bn-ico">⇌</div><div class="bn-lbl">Split</div></button>
   <button class="bn" data-tab="analytics"><div class="bn-ico">≋</div><div class="bn-lbl">Analytics</div></button>
   <button class="bn" data-tab="settings"><div class="bn-ico">◈</div><div class="bn-lbl">Settings</div></button>
+  <button class="bn" data-tab="feedback"><div class="bn-ico">★</div><div class="bn-lbl">Feedback</div></button>
 </div>
 </nav>
 
