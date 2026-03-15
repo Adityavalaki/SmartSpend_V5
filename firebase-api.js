@@ -439,11 +439,27 @@ async function sbCheckSession() {
   });
 }
 
-// Keep _sb compatible reference for checkStatus in app.js
+// Keep _sb compatible reference for app.js
 window._sb = {
   from: function() {
     return {
-      select: function() { return { limit: function() { return Promise.resolve({ error: null }); } }; }
+      select: function() { 
+        return { limit: function() { return Promise.resolve({ error: null }); } }; 
+      }
     };
+  },
+  // Add auth stub so app.js doesn't crash
+  auth: {
+    getUser: async function() {
+      var user = _auth.currentUser;
+      return { data: { user: user }, error: null };
+    },
+    getSession: async function() {
+      var user = _auth.currentUser;
+      return { data: { session: user ? { user: user } : null }, error: null };
+    },
+    onAuthStateChanged: function(cb) {
+      return _auth.onAuthStateChanged(cb);
+    }
   }
 };
