@@ -343,6 +343,71 @@ function insCard(i) {
 }
 
 // ═══════════════════════════════
+// WALLETS
+// ═══════════════════════════════
+function setWallet(w) {
+  var id = w === 'cash' ? 'set-cash' : 'set-dig';
+  var bal = parseFloat(document.getElementById(id).value || 0);
+  if (isNaN(bal) || bal < 0) { toast('Invalid balance', 'error'); return; }
+  POST(API + '/wallets.php?action=set_balance', {wallet:w, balance:bal}, function(err, r) {
+    if (r && r.status === 'updated') {
+      wallets[w] = bal;
+      updateWalletUI();
+      toast((w==='cash'?'Cash':'Digital') + ' wallet updated!', 'success');
+    } else {
+      toast('Failed to update', 'error');
+    }
+  });
+}
+
+function doTransfer() {
+  var from = document.getElementById('tr-from').value;
+  var to = document.getElementById('tr-to').value;
+  var amt = parseFloat(document.getElementById('tr-amt').value || 0);
+  var note = document.getElementById('tr-note').value.trim();
+  if (!amt || amt <= 0) { toast('Enter amount', 'error'); return; }
+  if (from === to) { toast('Cannot transfer to same wallet', 'error'); return; }
+  POST(API + '/wallets.php?action=transfer', {from:from, to:to, amount:amt, note:note}, function(err, r) {
+    if (r && r.status === 'transferred') {
+      wallets[from] = Math.max(0, (wallets[from]||0) - amt);
+      wallets[to] = (wallets[to]||0) + amt;
+      updateWalletUI();
+      document.getElementById('tr-amt').value = '';
+      document.getElementById('tr-note').value = '';
+      renderTransferHist();
+      toast('Transferred ' + cur(amt, 2) + '!', 'success');
+    } else {
+      toast((r && r.error) ? r.error : 'Transfer failed', 'error');
+    }
+  });
+}
+
+function updateWalletUI() {
+  var ids = ['w-cash-bal','dash-cash-bal'];
+  ids.forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=cur(wallets.cash||0); });
+  var ids2 = ['w-dig-bal','dash-dig-bal'];
+  ids2.forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=cur(wallets.digital||0); });
+}
+
+function renderTransferHist() {
+  var c = document.getElementById('tr-hist');
+  if (!c) return;
+  GET(API + '/wallets.php?action=transfers', function(err, r) {
+    if (!r || !r.transfers || !r.transfers.length) {
+      c.innerHTML = '<div class="emp"><span class="emp-ico">⇌</span><div class="emp-t">No Transfers Yet</div></div>';
+      return;
+    }
+    c.innerHTML = r.transfers.map(function(t) {
+      return '<div class="txi">' +
+        '<div class="tx-ico">' + (t.from_wallet==='cash'?'💵':'💳') + '→' + (t.to_wallet==='cash'?'💵':'💳') + '</div>' +
+        '<div class="tx-det"><div class="tx-cat">' + t.from_wallet + ' → ' + t.to_wallet + '</div><div class="tx-dsc">' + (t.note||'Transfer') + ' · ' + t.tx_date + '</div></div>' +
+        '<div class="tx-meta"><div class="tx-amt income">+' + cfg.currency + fmt(t.amount,2) + '</div></div>' +
+      '</div>';
+    }).join('');
+  });
+}
+
+// ═══════════════════════════════
 // BUDGET
 // ═══════════════════════════════
 function saveBudget() {
