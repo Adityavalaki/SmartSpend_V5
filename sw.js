@@ -9,6 +9,7 @@ var STATIC_ASSETS = [
   '/index.html',
   '/login.html',
   '/app.js',
+  '/feedback.js',
   '/ui-polish.js',
   '/ui-polish.css',
   '/firebase-api.js',
