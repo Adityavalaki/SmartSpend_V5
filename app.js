@@ -420,6 +420,7 @@ function saveBudget() {
   });
 }
 
+// Charts/data/export logic extracted to analytics.js and settings-data.js
 // ═══════════════════════════════
 // CHARTS
 // ═══════════════════════════════
