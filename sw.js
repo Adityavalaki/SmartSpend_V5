@@ -2,6 +2,7 @@
 // SmartSpend v6 — Service Worker (PWA)
 // ═══════════════════════════════════════════════════
 
+var CACHE_NAME = 'smartspend-v8';
 var CACHE_NAME = 'smartspend-v7';
 
 var STATIC_ASSETS = [

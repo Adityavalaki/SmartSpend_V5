@@ -2,6 +2,7 @@
 // Fully self-contained, no CSS class dependency for tab switching
 
 var API = 'api';
+var APP_BUILD = '2026-04-24-v6-net-wallet-balance';
 var TODAY = new Date().toISOString().split('T')[0];
 var NOW = new Date();
 var txs = [], goals = [], splits = [], wallets = {cash:0, digital:0};
@@ -260,7 +261,8 @@ function updateDashboard() {
     }
   });
 
-  var bal = inc - exp;
+  var flowBal = inc - exp;
+  var netWalletBal = (wallets.cash || 0) + (wallets.digital || 0);
   var bl = Math.max(0, cfg.budgetLimit - exp);
 
   var budSwitch = document.getElementById('bud-switch');
@@ -282,7 +284,7 @@ function updateDashboard() {
   function set(id, val) { var e = document.getElementById(id); if(e) e.textContent = val; }
 
   set('month-label', NOW.toLocaleString('en-IN', {month:'long', year:'numeric'}));
-  set('bal-val', Math.abs(bal).toFixed(2));
+  set('bal-val', Math.abs(netWalletBal).toFixed(2));
   set('p-inc', cur(inc));
   set('p-exp', cur(exp));
   set('s-today', cur(todayExp));
@@ -297,7 +299,7 @@ function updateDashboard() {
   set('dash-dig-out', '-' + cur(digExp));
 
   var beq = document.getElementById('bal-eq');
-  if (beq) { beq.textContent = cur(bal); beq.className = bal >= 0 ? 'pos' : 'neg'; }
+  if (beq) { beq.textContent = cur(flowBal); beq.className = flowBal >= 0 ? 'pos' : 'neg'; }
 
   updateBudgetUI(exp, cashExp, digExp);
   buildInsightsLocal(md, exp, inc);
