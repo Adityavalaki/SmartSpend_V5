@@ -10,6 +10,7 @@ var STATIC_ASSETS = [
   '/login.html',
   '/app.js',
   '/transactions.js',
+  '/finance-modules.js',
   '/feedback.js',
   '/ui-polish.js',
   '/ui-polish.css',
