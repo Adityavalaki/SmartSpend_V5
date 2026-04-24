@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="ui-polish.css">
 <script>
   // Prevent flash — hide body until auth confirmed
   document.documentElement.style.visibility = 'hidden';
@@ -668,13 +669,13 @@ select.fi option{background:var(--bge);color:var(--tx)}
     </div>
     <div class="card">
       <div class="ch"><span class="ct">System</span></div>
-      <div class="sr"><div><div class="sr-l">PHP API</div><div class="sr-h"></div></div><div class="chip"><div class="dot" id="php-dot"></div><span id="php-st">…</span></div></div>
+      <div class="sr"><div><div class="sr-l">API Status</div><div class="sr-h"></div></div><div class="chip"><div class="dot" id="php-dot"></div><span id="php-st">…</span></div></div>
       <div class="sr" style="border:none"><div><div class="sr-l">Database</div><div class="sr-h"></div></div><div class="chip"><div class="dot" id="db-dot"></div><span id="db-st">…</span></div></div>
     </div>
   </div>
   <div class="card">
     <div class="ch"><span class="ct">Data</span></div>
-    <p style="font-size:12.5px;color:var(--tx2);margin-bottom:14px">All data stored in MySQL database.</p>
+    <p style="font-size:12.5px;color:var(--tx2);margin-bottom:14px">All data is stored in your secure cloud database.</p>
     <div class="br">
       <button class="btn btn-g" onclick="exportJSON()">💾 Backup</button>
       <button class="btn btn-g" onclick="restoreData()">↩ Restore</button>
@@ -691,7 +692,7 @@ select.fi option{background:var(--bge);color:var(--tx)}
       <span class="cbadge">LINKEDIN LAUNCH</span>
     </div>
     <p style="font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6">
-      SmartSpend v6 is live! Built with Supabase + vanilla JS. 
+      SmartSpend v6 is live! Built with vanilla JS and a cloud backend. 
       Your feedback helps improve it. 🚀
     </p>
 
@@ -758,10 +759,11 @@ select.fi option{background:var(--bge);color:var(--tx)}
 
 </div><!-- /shell -->
    <div style="text-align:center;padding:18px 18px 90px 18px;font-size:11px;color:#2d3f56;font-family:'JetBrains Mono',monospace;letter-spacing:.5px">
-  © <?php echo date('Y'); ?> SmartSpend &nbsp;·&nbsp; Developed by 
+  © <span id="footer-year"></span> SmartSpend &nbsp;·&nbsp; Developed by 
   <a href="https://www.linkedin.com/in/aditya-j-valaki/" target="_blank" style="color:#00d4b8;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(0,212,184,.3)">Aditya Valaki</a>
 </div>
 <script src="app.js?v=5"></script>
+<script src="ui-polish.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
