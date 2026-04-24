@@ -14,6 +14,7 @@ var STATIC_ASSETS = [
   '/analytics.js',
   '/settings-data.js',
   '/feedback.js',
+  '/health-check.js',
   '/ui-polish.js',
   '/ui-polish.css',
   '/firebase-api.js',
