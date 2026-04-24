@@ -2,19 +2,25 @@
 // SmartSpend v6 — Service Worker (PWA)
 // ═══════════════════════════════════════════════════
 
-var CACHE_NAME = 'smartspend-v6';
+var CACHE_NAME = 'smartspend-v7';
 
 var STATIC_ASSETS = [
   '/',
   '/index.html',
   '/login.html',
   '/app.js',
-  '/supabase-api.js',
+  '/transactions.js',
+  '/feedback.js',
+  '/ui-polish.js',
+  '/ui-polish.css',
+  '/firebase-api.js',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
@@ -45,8 +51,8 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   var url = e.request.url;
 
-  // Always go network-first for Supabase API calls
-  if (url.indexOf('supabase.co') !== -1) {
+  // Always go network-first for cloud API calls
+  if (url.indexOf('googleapis.com') !== -1 || url.indexOf('firebase') !== -1) {
     e.respondWith(
       fetch(e.request).catch(function() {
         return new Response(JSON.stringify({ error: 'offline' }), {
