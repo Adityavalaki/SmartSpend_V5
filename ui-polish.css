@@ -1,4 +1,5 @@
 /* SmartSpend UI polish layer (kept framework-free and minimal) */
+/* SmartSpend UI polish layer (kept framework-free) */
 
 :root {
   --focus-ring: 0 0 0 3px rgba(0, 212, 184, 0.18);
@@ -27,4 +28,84 @@
 
 .card:hover {
   transform: translateY(-2px);
+}
+
+/* command palette */
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(1, 4, 10, 0.62);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 14dvh 16px 24px;
+}
+
+.cp-overlay.open {
+  display: flex;
+}
+
+.cp {
+  width: min(680px, 100%);
+  background: var(--bgc);
+  border: 1px solid var(--bda);
+  border-radius: 16px;
+  box-shadow: var(--shL);
+  overflow: hidden;
+}
+
+.cp-head {
+  padding: 12px;
+  border-bottom: 1px solid var(--bd);
+}
+
+.cp-input {
+  width: 100%;
+  border: 1px solid var(--bd);
+  background: var(--bge);
+  color: var(--tx);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font: 600 14px var(--f);
+}
+
+.cp-list {
+  max-height: 340px;
+  overflow: auto;
+  padding: 8px;
+}
+
+.cp-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tx2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font: 600 13px var(--f);
+}
+
+.cp-item:hover,
+.cp-item.sel {
+  border-color: var(--bda);
+  color: var(--tx);
+  background: rgba(0, 212, 184, 0.08);
+}
+
+.cp-kbd {
+  float: right;
+  font: 600 10px var(--fm);
+  color: var(--tx3);
+}
+
+.cp-help {
+  border-top: 1px solid var(--bd);
+  color: var(--tx3);
+  font: 500 11px var(--fm);
+  padding: 10px 12px;
 }

@@ -93,6 +93,7 @@ function delTx(id) {
     txs = txs.filter(function(t){ return t.id != id; });
     syncWalletBalances();
     loadAllTx(); buildFilterMonth();
+    updateDashboard(); loadAllTx(); buildFilterMonth();
     toast('Deleted', 'success');
   });
 }
