@@ -1,5 +1,15 @@
 // SmartSpend — Transactions module
 
+function applyWalletDelta(state, payMode, txType, amount) {
+  var key = payMode === 'cash' ? 'cash' : 'digital';
+  var next = {
+    cash: parseFloat(state.cash || 0),
+    digital: parseFloat(state.digital || 0)
+  };
+  next[key] = next[key] + (txType === 'income' ? amount : -amount);
+  return next;
+}
+
 function txCard(t, showDel) {
   var isCash = t.pay_mode === 'cash';
   var mTag = '<span class="tag ' + (isCash ? 'tag-cash' : 'tag-dig') + '">' + (MODE_LABEL[t.pay_mode] || t.pay_mode) + '</span>';
@@ -165,6 +175,7 @@ function saveTx() {
       t.amount = parseFloat(t.amount);
       t.recurring = !!parseInt(t.recurring);
       txs.unshift(t);
+      wallets = applyWalletDelta(wallets, pm, type, amount);
       var walletKey = pm === 'cash' ? 'cash' : 'digital';
       wallets[walletKey] = (wallets[walletKey] || 0) + (type === 'income' ? amount : -amount);
       if (typeof updateWalletUI === 'function') updateWalletUI();

@@ -2,6 +2,9 @@
 
 Use this checklist after each deploy or service-worker cache bump.
 
+## Quick Automation (local)
+- [ ] Run `node tests/balance-sync.test.js` and confirm it passes.
+
 ## Boot & Session
 - [ ] Open app and confirm no health-check error toast appears.
 - [ ] Verify Dashboard tab loads by default.
