@@ -49,6 +49,10 @@
   function runChecks() {
     var okFunctions = checkFunctions();
     var okDom = checkDom();
+    var build = window.__APP_BUILD__ || 'unknown-build';
+
+    if (okFunctions && okDom) {
+      console.info('[HealthCheck] SmartSpend runtime checks passed. Build: ' + build);
 
     if (okFunctions && okDom) {
       console.info('[HealthCheck] SmartSpend runtime checks passed.');

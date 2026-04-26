@@ -4,6 +4,10 @@ Use this checklist after each deploy or service-worker cache bump.
 
 ## Quick Automation (local)
 - [ ] Run `node tests/run-all-tests.js` and confirm all tests pass.
+
+## Boot & Session
+- [ ] Open app and confirm no health-check error toast appears.
+- [ ] Open console and confirm health-check log shows current build.
 - [ ] Run `node tests/balance-sync.test.js` and confirm it passes.
 
 ## Boot & Session

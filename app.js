@@ -3,6 +3,7 @@
 
 var API = 'api';
 var APP_BUILD = '2026-04-24-v6-net-wallet-balance';
+if (typeof window !== 'undefined') window.__APP_BUILD__ = APP_BUILD;
 var TODAY = new Date().toISOString().split('T')[0];
 var NOW = new Date();
 var txs = [], goals = [], splits = [], wallets = {cash:0, digital:0};
