@@ -13,6 +13,7 @@ function applyWalletDelta(state, payMode, txType, amount) {
 function txCard(t, showDel) {
   var isCash = t.pay_mode === 'cash';
   var mTag = '<span class="tag ' + (isCash ? 'tag-cash' : 'tag-dig') + '">' + (MODE_LABEL[t.pay_mode] || t.pay_mode) + '</span>';
+  var delBtn = showDel ? '<button class="btn btn-d btn-s" onclick="delTx(' + JSON.stringify(String(t.id)) + ')">✕</button>' : '';
   var delBtn = showDel ? '<button class="btn btn-d btn-s" onclick="delTx(' + t.id + ')">✕</button>' : '';
   var sign = t.type === 'expense' ? '−' : '+';
   var date = new Date(t.tx_date).toLocaleDateString('en-IN', {day:'2-digit', month:'short'});
