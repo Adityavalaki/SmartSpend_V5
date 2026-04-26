@@ -103,7 +103,6 @@ function delTx(id) {
     txs = txs.filter(function(t){ return t.id != id; });
     syncWalletBalances();
     loadAllTx(); buildFilterMonth();
-    updateDashboard(); loadAllTx(); buildFilterMonth();
     toast('Deleted', 'success');
   });
 }
@@ -176,8 +175,6 @@ function saveTx() {
       t.recurring = !!parseInt(t.recurring);
       txs.unshift(t);
       wallets = applyWalletDelta(wallets, pm, type, amount);
-      var walletKey = pm === 'cash' ? 'cash' : 'digital';
-      wallets[walletKey] = (wallets[walletKey] || 0) + (type === 'income' ? amount : -amount);
       if (typeof updateWalletUI === 'function') updateWalletUI();
       toast('Saved! ' + (MODE_LABEL[pm] || pm), 'success');
     } else {
