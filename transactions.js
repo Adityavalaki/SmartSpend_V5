@@ -77,10 +77,22 @@ function buildFilterMonth() {
   });
 }
 
+function syncWalletBalances() {
+  GET(API + '/wallets.php', function(err, wr) {
+    if (wr && wr.wallets) {
+      wallets = wr.wallets;
+      if (typeof updateWalletUI === 'function') updateWalletUI();
+      updateDashboard();
+    }
+  });
+}
+
 function delTx(id) {
   if (!confirm('Delete?')) return;
   DEL(API + '/transactions.php?id=' + id, function(err, r) {
     txs = txs.filter(function(t){ return t.id != id; });
+    syncWalletBalances();
+    loadAllTx(); buildFilterMonth();
     updateDashboard(); loadAllTx(); buildFilterMonth();
     toast('Deleted', 'success');
   });
@@ -153,6 +165,9 @@ function saveTx() {
       t.amount = parseFloat(t.amount);
       t.recurring = !!parseInt(t.recurring);
       txs.unshift(t);
+      var walletKey = pm === 'cash' ? 'cash' : 'digital';
+      wallets[walletKey] = (wallets[walletKey] || 0) + (type === 'income' ? amount : -amount);
+      if (typeof updateWalletUI === 'function') updateWalletUI();
       toast('Saved! ' + (MODE_LABEL[pm] || pm), 'success');
     } else {
       txs.unshift({amount:amount, category:cat, type:type, pay_mode:pm, tx_date:date, description:desc, recurring:rec, id:Date.now()});
@@ -161,6 +176,7 @@ function saveTx() {
     clearForm();
     updateDashboard();
     buildFilterMonth();
+    syncWalletBalances();
   });
 }
 
