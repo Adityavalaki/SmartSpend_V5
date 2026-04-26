@@ -345,6 +345,71 @@ function insCard(i) {
 }
 
 // ═══════════════════════════════
+// WALLETS
+// ═══════════════════════════════
+function setWallet(w) {
+  var id = w === 'cash' ? 'set-cash' : 'set-dig';
+  var bal = parseFloat(document.getElementById(id).value || 0);
+  if (isNaN(bal) || bal < 0) { toast('Invalid balance', 'error'); return; }
+  POST(API + '/wallets.php?action=set_balance', {wallet:w, balance:bal}, function(err, r) {
+    if (r && r.status === 'updated') {
+      wallets[w] = bal;
+      updateWalletUI();
+      toast((w==='cash'?'Cash':'Digital') + ' wallet updated!', 'success');
+    } else {
+      toast('Failed to update', 'error');
+    }
+  });
+}
+
+function doTransfer() {
+  var from = document.getElementById('tr-from').value;
+  var to = document.getElementById('tr-to').value;
+  var amt = parseFloat(document.getElementById('tr-amt').value || 0);
+  var note = document.getElementById('tr-note').value.trim();
+  if (!amt || amt <= 0) { toast('Enter amount', 'error'); return; }
+  if (from === to) { toast('Cannot transfer to same wallet', 'error'); return; }
+  POST(API + '/wallets.php?action=transfer', {from:from, to:to, amount:amt, note:note}, function(err, r) {
+    if (r && r.status === 'transferred') {
+      wallets[from] = Math.max(0, (wallets[from]||0) - amt);
+      wallets[to] = (wallets[to]||0) + amt;
+      updateWalletUI();
+      document.getElementById('tr-amt').value = '';
+      document.getElementById('tr-note').value = '';
+      renderTransferHist();
+      toast('Transferred ' + cur(amt, 2) + '!', 'success');
+    } else {
+      toast((r && r.error) ? r.error : 'Transfer failed', 'error');
+    }
+  });
+}
+
+function updateWalletUI() {
+  var ids = ['w-cash-bal','dash-cash-bal'];
+  ids.forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=cur(wallets.cash||0); });
+  var ids2 = ['w-dig-bal','dash-dig-bal'];
+  ids2.forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=cur(wallets.digital||0); });
+}
+
+function renderTransferHist() {
+  var c = document.getElementById('tr-hist');
+  if (!c) return;
+  GET(API + '/wallets.php?action=transfers', function(err, r) {
+    if (!r || !r.transfers || !r.transfers.length) {
+      c.innerHTML = '<div class="emp"><span class="emp-ico">⇌</span><div class="emp-t">No Transfers Yet</div></div>';
+      return;
+    }
+    c.innerHTML = r.transfers.map(function(t) {
+      return '<div class="txi">' +
+        '<div class="tx-ico">' + (t.from_wallet==='cash'?'💵':'💳') + '→' + (t.to_wallet==='cash'?'💵':'💳') + '</div>' +
+        '<div class="tx-det"><div class="tx-cat">' + t.from_wallet + ' → ' + t.to_wallet + '</div><div class="tx-dsc">' + (t.note||'Transfer') + ' · ' + t.tx_date + '</div></div>' +
+        '<div class="tx-meta"><div class="tx-amt income">+' + cfg.currency + fmt(t.amount,2) + '</div></div>' +
+      '</div>';
+    }).join('');
+  });
+}
+
+// ═══════════════════════════════
 // BUDGET
 // ═══════════════════════════════
 function saveBudget() {
@@ -358,6 +423,185 @@ function saveBudget() {
 }
 
 // Charts/data/export logic extracted to analytics.js and settings-data.js
+// ═══════════════════════════════
+// CHARTS
+// ═══════════════════════════════
+function buildDashCharts(md) {
+  var cc = chartColors();
+  var cats = {};
+  md.filter(function(t){ return t.type==='expense'; }).forEach(function(t){
+    cats[t.category] = (cats[t.category]||0) + t.amount;
+  });
+  if (charts.cat) { charts.cat.destroy(); charts.cat = null; }
+  var c1 = document.getElementById('catChart');
+  var keys = Object.keys(cats);
+  if (c1 && keys.length) {
+    charts.cat = new Chart(c1, {
+      type:'doughnut',
+      data:{labels:keys, datasets:[{data:keys.map(function(k){return cats[k];}), backgroundColor:PAL, borderColor:'transparent', borderWidth:0, hoverOffset:6}]},
+      options:{responsive:true, maintainAspectRatio:false, cutout:'64%', plugins:{legend:{position:'bottom', labels:{color:cc.color, font:{size:10}, padding:9, boxWidth:8}}}}
+    });
+  }
+  var cashExp = md.filter(function(t){return t.type==='expense'&&t.pay_mode==='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  var digExp = md.filter(function(t){return t.type==='expense'&&t.pay_mode!=='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  if (charts.mode) { charts.mode.destroy(); charts.mode = null; }
+  var c2 = document.getElementById('modeChart');
+  if (c2 && (cashExp || digExp)) {
+    charts.mode = new Chart(c2, {
+      type:'doughnut',
+      data:{labels:['💵 Cash','💳 Digital'], datasets:[{data:[cashExp,digExp], backgroundColor:['rgba(245,158,11,.7)','rgba(59,130,246,.7)'], borderColor:['#f59e0b','#3b82f6'], borderWidth:2, hoverOffset:6}]},
+      options:{responsive:true, maintainAspectRatio:false, cutout:'64%', plugins:{legend:{position:'bottom', labels:{color:cc.color, font:{size:11, weight:'600'}, padding:12, boxWidth:10}}}}
+    });
+  }
+}
+
+function buildAnalyticsCharts() {
+  var md = monthTxs();
+  var cc = chartColors();
+  var modes = {};
+  md.filter(function(t){return t.type==='expense';}).forEach(function(t){
+    modes[t.pay_mode] = (modes[t.pay_mode]||0) + t.amount;
+  });
+  if (charts.pm) { charts.pm.destroy(); charts.pm = null; }
+  var c1 = document.getElementById('pmChart');
+  var mkeys = Object.keys(modes);
+  if (c1 && mkeys.length) {
+    charts.pm = new Chart(c1, {
+      type:'doughnut',
+      data:{labels:mkeys.map(function(k){return MODE_LABEL[k]||k;}), datasets:[{data:mkeys.map(function(k){return modes[k];}), backgroundColor:PAL, borderColor:'transparent', borderWidth:0}]},
+      options:{responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{legend:{position:'bottom', labels:{color:cc.color, font:{size:10}, padding:8, boxWidth:8}}}}
+    });
+  }
+  var cashExp = md.filter(function(t){return t.type==='expense'&&t.pay_mode==='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  var digExp  = md.filter(function(t){return t.type==='expense'&&t.pay_mode!=='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  var cashInc = md.filter(function(t){return t.type==='income'&&t.pay_mode==='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  var digInc  = md.filter(function(t){return t.type==='income'&&t.pay_mode!=='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  if (charts.cd) { charts.cd.destroy(); charts.cd = null; }
+  var c2 = document.getElementById('cdChart');
+  if (c2) {
+    charts.cd = new Chart(c2, {
+      type:'bar',
+      data:{labels:['Cash In','Cash Out','Digital In','Digital Out'], datasets:[{data:[cashInc,cashExp,digInc,digExp], backgroundColor:['rgba(29,233,130,.55)','rgba(245,158,11,.55)','rgba(76,143,255,.55)','rgba(255,79,109,.55)'], borderColor:['#1de982','#f59e0b','#4c8fff','#ff4f6d'], borderWidth:1.5, borderRadius:8}]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:cc.grid}, ticks:{color:cc.color, font:{size:10}}}, y:{grid:{color:cc.grid}, ticks:{color:cc.color, font:{size:10}}}}}
+    });
+  }
+  GET(API + '/analytics.php?action=monthly_report&month=' + (NOW.getMonth()+1) + '&year=' + NOW.getFullYear(), function(err, mr) {
+    if (charts.mo) { charts.mo.destroy(); charts.mo = null; }
+    var c3 = document.getElementById('moChart');
+    if (c3 && mr && mr.months) {
+      charts.mo = new Chart(c3, {
+        type:'bar',
+        data:{labels:mr.months.map(function(m){return m.label;}), datasets:[
+          {label:'Income', data:mr.months.map(function(m){return m.income;}), backgroundColor:'rgba(29,233,130,.4)', borderColor:'#1de982', borderWidth:1.5, borderRadius:5},
+          {label:'Expense', data:mr.months.map(function(m){return m.expense;}), backgroundColor:'rgba(255,79,109,.4)', borderColor:'#ff4f6d', borderWidth:1.5, borderRadius:5}
+        ]},
+        options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:cc.color, font:{size:10}}}}, scales:{x:{grid:{color:cc.grid}, ticks:{color:cc.color, font:{size:10}}}, y:{grid:{color:cc.grid}, ticks:{color:cc.color, font:{size:10}}}}}
+      });
+    }
+  });
+  var cats = {};
+  md.filter(function(t){return t.type==='expense';}).forEach(function(t){ cats[t.category]=(cats[t.category]||0)+t.amount; });
+  var sorted = Object.keys(cats).map(function(c){return [c,cats[c]];}).sort(function(a,b){return b[1]-a[1];});
+  var total = sorted.reduce(function(s,c){return s+c[1];},0) || 1;
+  var cr = document.getElementById('cat-rank');
+  if (cr) cr.innerHTML = sorted.map(function(item, i) {
+    var pct = (item[1]/total*100).toFixed(1);
+    return '<div style="margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+        '<span style="font-size:12px;font-weight:600">' + catEmoji(item[0]) + ' ' + item[0] + '</span>' +
+        '<span style="font-family:var(--fm);font-size:11px;color:var(--cyan)">' + cur(item[1],0) + ' · ' + pct + '%</span>' +
+      '</div>' +
+      '<div class="pt"><div class="pf" style="width:' + pct + '%;background:' + PAL[i%PAL.length] + '"></div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function rebuildCharts() {
+  var md = monthTxs();
+  setTimeout(function() {
+    buildDashCharts(md);
+    var ana = document.getElementById('tab-analytics');
+    if (ana && ana.style.display !== 'none') buildAnalyticsCharts();
+  }, 100);
+}
+
+// ═══════════════════════════════
+// SETTINGS
+// ═══════════════════════════════
+function saveSettings() {
+  cfg.currency = document.getElementById('cur-sel').value;
+  POST(API + '/settings.php', {currency:cfg.currency}, function(err, r) {
+    var hc = document.getElementById('hdr-cur');
+    if (hc) hc.textContent = cfg.currency;
+    toast(r ? 'Saved!' : 'Saved locally', r ? 'success' : 'info');
+    updateDashboard();
+  });
+}
+
+// ═══════════════════════════════
+// EXPORT
+// ═══════════════════════════════
+function exportCSV() {
+  var rows = [['Date','Category','Type','Pay Mode','Amount','Description','Recurring']];
+  txs.forEach(function(t){ rows.push([t.tx_date, t.category, t.type, t.pay_mode, t.amount, t.description||'', t.recurring?'Yes':'No']); });
+  dl(rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n'), 'smartspend-'+TODAY+'.csv', 'text/csv');
+  toast('CSV exported!', 'success');
+}
+function exportJSON() {
+  dl(JSON.stringify({transactions:txs, goals:goals, splits:splits, wallets:wallets, settings:cfg, exported:new Date().toISOString()}, null, 2), 'smartspend-backup-'+TODAY+'.json', 'application/json');
+  toast('Backup saved!', 'success');
+}
+function dl(content, fname, mime) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type:mime}));
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function copySum() {
+  var md = monthTxs();
+  var inc = md.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var exp = md.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  var cashExp = md.filter(function(t){return t.type==='expense'&&t.pay_mode==='cash';}).reduce(function(s,t){return s+t.amount;},0);
+  var text = '📊 SmartSpend — ' + NOW.toLocaleString('en-IN',{month:'long',year:'numeric'}) +
+    '\n💰 Income: ' + cur(inc,2) + '\n📉 Expenses: ' + cur(exp,2) +
+    '\n💵 Cash: ' + cur(cashExp,2) + ' | 💳 Digital: ' + cur(exp-cashExp,2) +
+    '\n💎 Saved: ' + cur(inc-exp,2) +
+    '\n👛 Cash Wallet: ' + cur(wallets.cash||0) + ' | Digital: ' + cur(wallets.digital||0);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){ toast('Copied!', 'success'); });
+  } else {
+    prompt('Copy:', text);
+  }
+}
+function restoreData() {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function(ev) {
+    var r = new FileReader();
+    r.onload = function(e) {
+      try {
+        var d = JSON.parse(e.target.result);
+        txs = d.transactions || [];
+        goals = d.goals || [];
+        splits = d.splits || [];
+        if (d.wallets) wallets = d.wallets;
+        if (d.settings) { cfg.budgetLimit=d.settings.budgetLimit||cfg.budgetLimit; cfg.currency=d.settings.currency||cfg.currency; }
+        updateDashboard(); renderGoals(); renderSplitHist();
+        toast('Restored!', 'success');
+      } catch(err) { toast('Restore failed', 'error'); }
+    };
+    r.readAsText(ev.target.files[0]);
+  };
+  inp.click();
+}
+function clearAll() {
+  if (!confirm('Delete ALL data?')) return;
+  if (!confirm('Final confirmation?')) return;
+  txs=[]; goals=[]; splits=[]; wallets={cash:0,digital:0};
+  updateDashboard(); renderGoals(); renderSplitHist();
+  toast('Cleared', 'success');
+}
 
 // ═══════════════════════════════
 // INIT
