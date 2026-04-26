@@ -13,6 +13,8 @@ function applyWalletDelta(state, payMode, txType, amount) {
 function txCard(t, showDel) {
   var isCash = t.pay_mode === 'cash';
   var mTag = '<span class="tag ' + (isCash ? 'tag-cash' : 'tag-dig') + '">' + (MODE_LABEL[t.pay_mode] || t.pay_mode) + '</span>';
+  var safeIdAttr = String(t.id).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  var delBtn = showDel ? '<button class="btn btn-d btn-s" data-txid="' + safeIdAttr + '" onclick="delTx(this.getAttribute(\'data-txid\'))">✕</button>' : '';
   var delBtn = showDel ? '<button class="btn btn-d btn-s" onclick="delTx(' + JSON.stringify(String(t.id)) + ')">✕</button>' : '';
   var delBtn = showDel ? '<button class="btn btn-d btn-s" onclick="delTx(' + t.id + ')">✕</button>' : '';
   var sign = t.type === 'expense' ? '−' : '+';
@@ -100,6 +102,7 @@ function syncWalletBalances() {
 
 function delTx(id) {
   if (!confirm('Delete?')) return;
+  DEL(API + '/transactions.php?id=' + encodeURIComponent(String(id)), function(err, r) {
   DEL(API + '/transactions.php?id=' + id, function(err, r) {
     txs = txs.filter(function(t){ return t.id != id; });
     syncWalletBalances();

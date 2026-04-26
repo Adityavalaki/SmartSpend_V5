@@ -3,6 +3,8 @@ const path = require('path');
 
 const tests = [
   'balance-sync.test.js',
+  'dashboard-balance.test.js',
+  'transaction-delete-button.test.js'
   'dashboard-balance.test.js'
 ];
 
