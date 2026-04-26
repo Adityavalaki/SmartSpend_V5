@@ -53,6 +53,9 @@
 
     if (okFunctions && okDom) {
       console.info('[HealthCheck] SmartSpend runtime checks passed. Build: ' + build);
+
+    if (okFunctions && okDom) {
+      console.info('[HealthCheck] SmartSpend runtime checks passed.');
     }
   }
 

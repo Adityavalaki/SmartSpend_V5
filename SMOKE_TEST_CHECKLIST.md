@@ -8,6 +8,10 @@ Use this checklist after each deploy or service-worker cache bump.
 ## Boot & Session
 - [ ] Open app and confirm no health-check error toast appears.
 - [ ] Open console and confirm health-check log shows current build.
+- [ ] Run `node tests/balance-sync.test.js` and confirm it passes.
+
+## Boot & Session
+- [ ] Open app and confirm no health-check error toast appears.
 - [ ] Verify Dashboard tab loads by default.
 - [ ] Verify user badge and theme button render normally.
 
