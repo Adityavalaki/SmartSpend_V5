@@ -3,6 +3,7 @@
 Use this checklist after each deploy or service-worker cache bump.
 
 ## Quick Automation (local)
+- [ ] Run `node tests/run-all-tests.js` and confirm all tests pass.
 - [ ] Run `node tests/balance-sync.test.js` and confirm it passes.
 
 ## Boot & Session
