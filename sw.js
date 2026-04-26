@@ -3,6 +3,9 @@
 // ═══════════════════════════════════════════════════
 
 var CACHE_NAME = 'smartspend-v10';
+var CACHE_NAME = 'smartspend-v9';
+var CACHE_NAME = 'smartspend-v8';
+var CACHE_NAME = 'smartspend-v7';
 
 var STATIC_ASSETS = [
   '/',
