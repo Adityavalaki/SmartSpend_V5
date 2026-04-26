@@ -1,0 +1,30 @@
+/* SmartSpend UI polish layer (kept framework-free and minimal) */
+
+:root {
+  --focus-ring: 0 0 0 3px rgba(0, 212, 184, 0.18);
+}
+
+.card,
+.st,
+.txi,
+.wc,
+.pm-opt,
+.ci,
+.fi,
+.btn {
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.fi:focus,
+.btn:focus-visible,
+.pm-opt:focus-visible,
+.ci:focus-visible,
+.dn:focus-visible,
+.bn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
